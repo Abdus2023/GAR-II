@@ -1,0 +1,36 @@
+id: calendar
+kind: connector
+version: 1.0.0
+author: "Claude Hub"
+category: productivity
+description: "Calendar and event management"
+
+permissions:
+  - calendar.read
+  - calendar.write
+
+dependencies:
+  - auth
+
+tools:
+  - id: list_events
+    description: List upcoming calendar events
+    input:
+      days: { type: number, default: 7 }
+    cost: low
+    latency: medium
+
+  - id: create_event
+    description: Create a new calendar event
+    input:
+      title: { type: string }
+      start: { type: string }
+      end: { type: string }
+      description: { type: string, default: "" }
+    cost: low
+    latency: medium
+    requires_confirmation: true
+
+events: []
+
+prompts: []

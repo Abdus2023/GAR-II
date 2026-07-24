@@ -1,0 +1,51 @@
+id: notes
+kind: connector
+version: 1.0.0
+author: "Claude Hub"
+category: productivity
+description: "Personal knowledge base for creating, searching, and managing notes"
+
+permissions:
+  - notes.read
+  - notes.write
+
+dependencies:
+  - auth
+  - filesystem
+
+tools:
+  - id: create
+    description: Create a new note
+    input:
+      title: { type: string }
+      content: { type: string }
+      tags: { type: array, items: { type: string }, default: [] }
+    cost: low
+    latency: low
+
+  - id: get
+    description: Retrieve a note by ID or title
+    input:
+      id: { type: string }
+    cost: low
+    latency: low
+
+  - id: search
+    description: Search notes by title or content
+    input:
+      query: { type: string }
+    cost: medium
+    latency: medium
+
+  - id: list
+    description: List all notes
+    input: {}
+    cost: low
+    latency: low
+
+events:
+  emits:
+    - notes:created
+    - notes:updated
+
+prompts: []

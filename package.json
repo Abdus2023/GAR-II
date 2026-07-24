@@ -1,0 +1,35 @@
+{
+  "name": "claude-hub",
+  "version": "0.1.0",
+  "description": "Claude Hub Gateway — Single MCP connector with unlimited internal capabilities",
+  "main": "src/index.ts",
+  "type": "module",
+  "bin": {
+    "claude-hub": "./packages/cli/src/index.ts"
+  },
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "node dist/index.js",
+    "build": "tsc",
+    "deploy:cloudflare": "wrangler deploy",
+    "setup": "node -e \"require('fs').copyFileSync('.env.example', '.env', { force: false })\" || true",
+    "quickstart": "npm run setup && npm run dev",
+    "test": "echo \"No tests yet\""
+  },
+  "dependencies": {
+    "@lancedb/lancedb": "^0.31.0",
+    "@libsql/client": "^0.10.0",
+    "@modelcontextprotocol/sdk": "^1.0.0",
+    "drizzle-orm": "^0.33.0",
+    "eventemitter3": "^5.0.0",
+    "hono": "^4.6.0",
+    "octokit": "^4.0.0",
+    "pino": "^9.0.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.23.1",
+    "typescript": "^5.5.0"
+  }
+}

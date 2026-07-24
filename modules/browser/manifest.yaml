@@ -1,0 +1,33 @@
+id: browser
+kind: connector
+version: 1.0.0
+author: "Claude Hub"
+category: automation
+description: "Web browsing and automation using Playwright"
+
+permissions:
+  - browser.read
+  - browser.interact
+
+dependencies:
+  - auth
+
+tools:
+  - id: open_page
+    description: Open a web page and return its text content
+    input:
+      url: { type: string }
+    cost: medium
+    latency: high
+
+  - id: extract_content
+    description: Extract specific content from a page using a selector
+    input:
+      url: { type: string }
+      selector: { type: string }
+    cost: medium
+    latency: high
+
+events: []
+
+prompts: []
