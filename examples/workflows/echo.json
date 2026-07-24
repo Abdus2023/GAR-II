@@ -1,0 +1,14 @@
+{
+  "id": "echo_workflow",
+  "name": "Echo Workflow",
+  "description": "Minimal workflow for exercising the CLI workflow runner",
+  "steps": [
+    {
+      "id": "echo",
+      "tool": "echo",
+      "input": {
+        "message": "{{message}}"
+      }
+    }
+  ]
+}

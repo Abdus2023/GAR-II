@@ -36,3 +36,13 @@ Thumbs.db
 secrets/
 *.pem
 *.key
+
+# Runtime vector storage
+data/
+
+# Runtime workspace files
+workspace/
+
+# Release artifacts
+artifacts/*
+!artifacts/.gitkeep

@@ -1,10 +1,16 @@
 # Claude OS / Agentic-Native Runtime (ANR) — Comprehensive Traceability Documentation (v6 — July 2026)
 
-**Status**: Authoritative single source of truth  
-**Last Updated**: 2026-07-23  
+**Status**: Historical snapshot; superseded for implementation status by v10
+**Last Updated**: 2026-07-23
 **Scope**: Full architecture, protocol, security, skills system, production operations, and traceability matrix
 
 ---
+
+## Supersession Notice
+
+This v6 document is retained for historical context only. It is not the current implementation traceability source.
+
+Use [`COMPREHENSIVE_TRACEABILITY_v10.md`](./COMPREHENSIVE_TRACEABILITY_v10.md) for the current code-to-requirement matrix, test inventory, endpoint list, and production gap assessment.
 
 ## 1. Executive Summary & Strategic Core
 
@@ -270,6 +276,6 @@ The architecture that survives the next 5–10 years is:
 - **Security by design** (confused deputy mitigation from day one)
 - **Stateless + edge-deployable** (Cloudflare Workers + Turso)
 
-This document is the single source of truth for the Claude OS / Agentic-Native Runtime project.
+This document is a historical traceability snapshot. The current implementation source of truth is `COMPREHENSIVE_TRACEABILITY_v10.md`.
 
 **Next immediate action**: Begin Phase 1 implementation of the Hub Gateway with Server Cards, OAuth 2.1 + DCR, and the core `workspace` tool.

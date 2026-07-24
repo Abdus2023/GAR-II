@@ -1,0 +1,61 @@
+id: github
+kind: connector
+version: 1.0.0
+author: "Claude Hub"
+category: developer
+description: "GitHub repository search, file reading, and pull request review"
+
+permissions:
+  - github.read
+  - github.write
+
+dependencies:
+  - auth
+
+tools:
+  - id: search_repo
+    description: Search GitHub repositories by keyword, topic, language, or owner
+    input:
+      query: { type: string }
+      limit: { type: number, default: 10 }
+    cost: medium
+    latency: medium
+
+  - id: read_file
+    description: Read a file or directory listing from a GitHub repository
+    input:
+      repository: { type: string, description: "owner/repo" }
+      path: { type: string }
+      ref: { type: string, optional: true }
+    cost: medium
+    latency: medium
+
+  - id: review_pr
+    description: Fetch pull request metadata, changed files, reviews, and diff for code review
+    input:
+      repository: { type: string, description: "owner/repo" }
+      pr_number: { type: number }
+      include_diff: { type: boolean, default: true }
+    cost: high
+    latency: high
+
+  - id: create_issue
+    description: Create a GitHub issue
+    input:
+      repository: { type: string, description: "owner/repo" }
+      title: { type: string }
+      body: { type: string, default: "" }
+      labels: { type: array, items: { type: string }, default: [] }
+      assignees: { type: array, items: { type: string }, default: [] }
+    cost: medium
+    latency: medium
+    requires_confirmation: true
+
+events:
+  emits:
+    - github:search_performed
+    - github:file_read
+    - github:pr_reviewed
+    - github:issue_created
+
+prompts: []

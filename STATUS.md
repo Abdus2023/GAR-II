@@ -1,72 +1,26 @@
-# Claude Hub Gateway — Current Status (Phase 1 Complete)
+# Status
 
-**Date**: 2026-07-23  
-**Version**: 0.1.0  
-**Status**: Functional foundation ready for testing and extension
+GAR-II is currently a **stabilized prototype**.
 
----
+## Current validation
 
-## ✅ What Works Right Now
+- TypeScript build passes.
+- SDK build passes.
+- Vitest suite passes.
+- Database migrations run.
+- Built Node server starts and serves health checks.
 
-### Core Gateway
-- Single `workspace` tool (solves Free tier 1-connector limit)
-- OAuth 2.1 skeleton + Dynamic Client Registration
-- Rate limiting (60 req/min)
-- Server Cards (`/.well-known/mcp/server-card.json`)
+## Maturity
 
-### Memory System (Persistent)
-- `workspace memory.set`
-- `workspace memory.get`
-- `workspace memory.search`
-- SQLite via Turso (works locally with file:local.db)
+The project has a strong working foundation but should not be marketed as fully production-ready yet.
 
-### GitHub Module (3 Real Tools)
-- `github.search_repo`
-- `github.read_file`
-- `github.review_pr`
-- Automatic loading from `modules/github/`
+Production blockers still include:
 
-### Skills System
-- PR Review skill (`skills://pr-review`)
-- Progressive disclosure (30-50 tokens until triggered)
-- Auto-trigger support
+- untrusted module sandboxing,
+- module signing/verification,
+- OpenTelemetry exporter,
+- real browser/calendar integrations,
+- Cloudflare Workers deployment validation,
+- enterprise policy/RBAC hardening.
 
-### Security
-- Secret scanner (blocks writes containing API keys/tokens)
-- Context Budget Manager (tracks token usage, warns at 85%/95%)
-
-### Developer Experience
-- Dynamic module loading
-- Full TypeScript + modern tooling
-- Clear project structure
-- Comprehensive documentation (14 files)
-
----
-
-## How to Run
-
-```bash
-npm install
-npm run dev
-```
-
-Then expose with:
-```bash
-cloudflared tunnel --url http://localhost:3000
-```
-
-Add the public URL at claude.ai → Connectors.
-
----
-
-## Next Recommended Steps
-
-1. **Test with Claude** (highest priority)
-2. Add more Skills
-3. Deploy to Cloudflare Workers
-4. Write tests
-5. Implement Hooks
-
----
-
-**This is a production-grade foundation.** All major architectural decisions from the original design are implemented and working.
+See `PROJECT_STATUS.md`, `README.md`, and `ENGINEERING_REVIEW.md` for details.

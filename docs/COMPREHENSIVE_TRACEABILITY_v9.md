@@ -1,9 +1,9 @@
 # Claude OS / Agentic-Native Runtime (ANR) — Comprehensive Traceability Documentation & Wiki Extended (v9 — July 2026)
 
-> **Status**: Authoritative Single Source of Truth & Complete Master Extended Wiki  
-> **Last Updated**: 2026-07-24  
-> **Target Platform**: Claude Chat Mobile & Desktop (Free Tier Beta & Paid Plans), Claude Code CLI/VS Code, ChatGPT, Gemini, Local Models  
-> **Core Architecture**: Agentic-Native Runtime (ANR) / Single Remote MCP Hub Gateway Pattern (MCP 2026-07-28 Spec)  
+> **Status**: Historical target-state wiki; superseded for implementation status by v10
+> **Last Updated**: 2026-07-24
+> **Target Platform**: Claude Chat Mobile & Desktop (Free Tier Beta & Paid Plans), Claude Code CLI/VS Code, ChatGPT, Gemini, Local Models
+> **Core Architecture**: Agentic-Native Runtime (ANR) / Single Remote MCP Hub Gateway Pattern (MCP 2026-07-28 Spec)
 
 ---
 
@@ -67,6 +67,29 @@
 45. [Part 45 — The Final Production Hardening Checklist](#part-45--the-final-production-hardening-checklist)
 
 ---
+
+## Current Implementation Status Addendum — v10 Supersession
+
+This v9 document is retained as a broad architecture/wiki reference. It contains target-state and aspirational material and should **not** be treated as the current implementation status source.
+
+For current implementation traceability, use:
+
+- [`COMPREHENSIVE_TRACEABILITY_v10.md`](./COMPREHENSIVE_TRACEABILITY_v10.md)
+- [`../PROJECT_STATUS.md`](../PROJECT_STATUS.md)
+- [`../README.md`](../README.md)
+
+Current validated baseline as of 2026-07-24:
+
+| Area | Current Status |
+|---|---|
+| Build/test | `npm run build`, `npm run build:sdk`, `npm test` pass |
+| Test suite | 29 files / 65 tests passing |
+| MCP | Streamable HTTP with session continuity and SDK e2e test |
+| Modules | dynamic loader plus filesystem, GitHub, notes, search, browser fetch, calendar REST, echo |
+| Auth | DB-backed OAuth client registration and JWT validation |
+| Security | kernel hooks, secret scanner, body-size limit, rate limit, confirmation gates, optional module signatures |
+| Observability | audit queue, dashboard, Prometheus metrics, OTLP trace exporter, correlation IDs |
+| Remaining blockers | sandboxing, production signature enforcement, Cloudflare validation, richer browser/calendar integrations, RBAC |
 
 # SECTION I: ARCHITECTURAL FOUNDATIONS & ECOSYSTEM GROUND TRUTHS
 
@@ -731,7 +754,7 @@ export class Kernel {
   async invoke(action: string, params: Record<string, any>, ctx: { userId: string }) {
     const handler = this.tools.get(action) || this.tools.get(`github.${action}`) || this.tools.get(`filesystem.${action}`)
     if (!handler) throw new Error(`Unknown action: ${action}`)
-    
+
     const start = performance.now()
     try {
       const result = await handler(params, ctx)
@@ -1111,5 +1134,5 @@ Full operational readiness checklist spanning OAuth 2.1 PKCE, DPoP, Zod schema v
 
 ---
 
-*Document Version: v9 (Traceability Documentation & Master Extended Wiki)*  
+*Document Version: v9 (Traceability Documentation & Master Extended Wiki)*
 *Traceability Target Repository: Abdus2023/GAR-II (`arena/019f9179-gar-ii`)*

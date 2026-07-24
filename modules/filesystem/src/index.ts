@@ -1,9 +1,10 @@
 import { z } from 'zod'
-import { readFile, writeFile, readdir, stat } from 'node:fs/promises'
-import { join, resolve } from 'node:path'
+import { mkdir, readFile, writeFile, readdir } from 'node:fs/promises'
+import { dirname, join, relative, resolve, sep } from 'node:path'
+import { config } from '../../../src/config'
 import type { Module, ModuleContext, Tool } from '../../../src/kernel/types'
 
-const BASE_DIR = process.env.WORKSPACE_DIR || './workspace'
+const BASE_DIR = config.workspaceDir
 
 export default class FilesystemModule implements Module {
   private ctx!: ModuleContext
@@ -61,8 +62,15 @@ export default class FilesystemModule implements Module {
   }
 
   private resolvePath(relativePath: string): string {
-    const safePath = relativePath.replace(/\.\./g, '') // basic path traversal protection
-    return resolve(BASE_DIR, safePath)
+    const baseRoot = resolve(BASE_DIR)
+    const fullPath = resolve(baseRoot, relativePath)
+    const relativeToBase = relative(baseRoot, fullPath)
+
+    if (relativeToBase === '..' || relativeToBase.startsWith(`..${sep}`) || resolve(relativePath) === fullPath && relativePath.startsWith(sep)) {
+      throw new Error('Path escapes the configured workspace directory')
+    }
+
+    return fullPath
   }
 
   private async readFile({ path }: { path: string }) {
@@ -86,6 +94,7 @@ export default class FilesystemModule implements Module {
   private async writeFile({ path, content }: { path: string; content: string }) {
     try {
       const fullPath = this.resolvePath(path)
+      await mkdir(dirname(fullPath), { recursive: true })
       await writeFile(fullPath, content, 'utf-8')
       
       this.ctx.events.emit('filesystem:file_written', { path })
@@ -135,7 +144,7 @@ export default class FilesystemModule implements Module {
         for (const entry of entries) {
           const full = join(dir, entry.name)
           if (entry.name.includes(query)) {
-            results.push(full.replace(BASE_DIR, ''))
+            results.push(relative(resolve(BASE_DIR), full))
           }
           if (entry.isDirectory()) {
             await searchDir(full)

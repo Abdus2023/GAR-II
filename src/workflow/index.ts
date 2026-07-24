@@ -1,5 +1,5 @@
 import { logger } from '../logger'
-import { planner, executor } from '../planner'
+import { executor } from '../planner'
 import type { ExecutionGraph } from '../planner'
 
 export interface WorkflowStep {
@@ -17,10 +17,44 @@ export interface WorkflowDefinition {
   steps: WorkflowStep[]
 }
 
+function interpolateValue(value: any, inputs: Record<string, any>): any {
+  if (typeof value === 'string') {
+    const exactMatch = value.match(/^{{\s*([\w.-]+)\s*}}$/)
+    if (exactMatch) {
+      return inputs[exactMatch[1]] ?? value
+    }
+
+    return value.replace(/{{\s*([\w.-]+)\s*}}/g, (match, key) => {
+      const replacement = inputs[key]
+      return replacement === undefined ? match : String(replacement)
+    })
+  }
+
+  if (Array.isArray(value)) {
+    return value.map(item => interpolateValue(item, inputs))
+  }
+
+  if (value && typeof value === 'object') {
+    return Object.fromEntries(
+      Object.entries(value).map(([key, entryValue]) => [key, interpolateValue(entryValue, inputs)])
+    )
+  }
+
+  return value
+}
+
+function resolveStepInput(step: WorkflowStep, inputs: Record<string, any>) {
+  return {
+    ...interpolateValue(step.input || {}, inputs),
+    ...inputs,
+  }
+}
+
 /**
- * Workflow Engine (Phase 4 skeleton)
- * 
- * Allows defining reusable, version-controlled workflows.
+ * Workflow Engine
+ *
+ * Allows defining reusable, version-controlled workflows and executing them as
+ * dependency-aware planner graphs.
  */
 export class WorkflowEngine {
   private workflows = new Map<string, WorkflowDefinition>()
@@ -38,8 +72,40 @@ export class WorkflowEngine {
     return Array.from(this.workflows.values())
   }
 
+  createExecutionGraph(
+    workflow: WorkflowDefinition,
+    inputs: Record<string, any> = {},
+    graphId = `wf-${workflow.id}-${Date.now()}`
+  ): ExecutionGraph {
+    const nodes = workflow.steps.map(step => ({
+      id: step.id,
+      type: (step.tool ? 'tool' : 'agent') as 'tool' | 'agent',
+      tool: step.tool,
+      agent: step.agent,
+      input: resolveStepInput(step, inputs),
+      dependsOn: step.dependsOn || [],
+    }))
+
+    return {
+      id: graphId,
+      goal: workflow.name,
+      nodes,
+      startNodes: nodes.filter(node => node.dependsOn.length === 0).map(node => node.id),
+    }
+  }
+
+  async runDefinition(
+    workflow: WorkflowDefinition,
+    inputs: Record<string, any> = {},
+    ctx: { userId: string }
+  ) {
+    logger.info({ workflowId: workflow.id }, 'Running workflow definition')
+    const graph = this.createExecutionGraph(workflow, inputs)
+    return executor.execute(graph, ctx)
+  }
+
   /**
-   * Convert a workflow definition into an executable graph
+   * Convert a registered workflow definition into an executable graph and run it.
    */
   async run(workflowId: string, inputs: Record<string, any> = {}, ctx: { userId: string }) {
     const workflow = this.workflows.get(workflowId)
@@ -48,25 +114,7 @@ export class WorkflowEngine {
     }
 
     logger.info({ workflowId }, 'Running workflow')
-
-    // Convert steps to ExecutionGraph format
-    const nodes = workflow.steps.map(step => ({
-      id: step.id,
-      type: (step.tool ? 'tool' : 'agent') as 'tool' | 'agent',
-      tool: step.tool,
-      agent: step.agent,
-      input: { ...step.input, ...inputs },
-      dependsOn: step.dependsOn || [],
-    }))
-
-    const graph: ExecutionGraph = {
-      id: `wf-${workflowId}-${Date.now()}`,
-      goal: workflow.name,
-      nodes,
-      startNodes: nodes.filter(n => n.dependsOn.length === 0).map(n => n.id),
-    }
-
-    return executor.execute(graph, ctx)
+    return this.runDefinition(workflow, inputs, ctx)
   }
 }
 
@@ -79,7 +127,7 @@ workflowEngine.register({
   description: 'Search for information and create a summary',
   steps: [
     { id: 'search', tool: 'search.query', input: { query: '{{query}}' } },
-    { id: 'summarize', agent: 'researcher', input: { task: 'Summarize the search results' }, dependsOn: ['search'] },
+    { id: 'summarize', agent: 'researcher', input: { task: 'Summarize the search results for {{query}}' }, dependsOn: ['search'] },
   ],
 })
 
@@ -89,6 +137,6 @@ workflowEngine.register({
   description: 'Full PR review using multiple agents',
   steps: [
     { id: 'fetch', tool: 'github.review_pr', input: { owner: '{{owner}}', repo: '{{repo}}', pr_number: '{{pr_number}}' } },
-    { id: 'review', agent: 'reviewer', input: { task: 'Review the PR' }, dependsOn: ['fetch'] },
+    { id: 'review', agent: 'reviewer', input: { task: 'Review PR #{{pr_number}} in {{owner}}/{{repo}}' }, dependsOn: ['fetch'] },
   ],
 })

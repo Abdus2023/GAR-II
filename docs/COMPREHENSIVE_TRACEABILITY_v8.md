@@ -1,11 +1,26 @@
 # Claude OS / Agentic-Native Runtime (ANR) — Comprehensive Traceability Documentation & Wiki (v8 — July 2026)
 
-> **Status**: Authoritative Single Source of Truth & Complete Master Wiki  
-> **Last Updated**: 2026-07-24  
-> **Target Platform**: Claude Chat Mobile & Desktop (Free Tier Beta & Paid Plans), ChatGPT, Gemini, Local Models  
-> **Core Architecture**: Agentic-Native Runtime (ANR) / Single Remote MCP Hub Gateway Pattern  
+> **Status**: Historical target-state wiki; superseded for implementation status by v10
+> **Last Updated**: 2026-07-24
+> **Target Platform**: Claude Chat Mobile & Desktop (Free Tier Beta & Paid Plans), ChatGPT, Gemini, Local Models
+> **Core Architecture**: Agentic-Native Runtime (ANR) / Single Remote MCP Hub Gateway Pattern
 
 ---
+
+## Current Implementation Status Addendum — v10 Supersession
+
+This v8 document is retained as an earlier architecture/wiki reference. It contains target-state and aspirational material and should not be used as the current implementation status source.
+
+Use [`COMPREHENSIVE_TRACEABILITY_v10.md`](./COMPREHENSIVE_TRACEABILITY_v10.md) for the current implementation traceability baseline.
+
+Current validated baseline as of 2026-07-24:
+
+- `npm run build`, `npm run build:sdk`, and `npm test` pass.
+- Test suite: 28 files / 62 tests passing.
+- MCP Streamable HTTP is validated with the official SDK client.
+- Dynamic modules, DB-backed OAuth, migrations, dashboard, metrics, telemetry, CLI, SDK, confirmation gates, and module signing support are implemented.
+- Remaining blockers include sandboxing, production signature enforcement, Cloudflare validation, RBAC, and deeper browser/calendar workflows.
+
 
 ## 📚 Wiki Table of Contents
 
@@ -127,7 +142,7 @@ Anthropic recommends shipping **two primary components**:
 ### 3.1 Composable System Architecture Diagram
 
 ```
-                       `Claude Mobile                            │                 Conversation Engine                            │                   Plugin / Skill Layer                            │          ┌─────────────────┴─────────────────┐          │                                   │       MCP Connector                   Local Memory          │                                   │          ├──────────────┬────────────────────┤          │              │                    │       GitHub         Notion              Calendar       Gmail          Drive               REST APIs       Databases      Vector DB           Custom Apps          │     OAuth / JWT          │     Your Backend`  
+                       `Claude Mobile                            │                 Conversation Engine                            │                   Plugin / Skill Layer                            │          ┌─────────────────┴─────────────────┐          │                                   │       MCP Connector                   Local Memory          │                                   │          ├──────────────┬────────────────────┤          │              │                    │       GitHub         Notion              Calendar       Gmail          Drive               REST APIs       Databases      Vector DB           Custom Apps          │     OAuth / JWT          │     Your Backend`
 ```
 
 ### 3.2 Modular Folder Hierarchy
@@ -240,7 +255,7 @@ Plugin
 ### 5.1 Generation v1: Plugin OS Architecture & Kernel
 
 ```
-                       `Claude Mobile                             │                      MCP Super Connector                             │                   Plugin Runtime (Core)                             │  ┌──────────────┬──────────────┬──────────────┬──────────────┐  │              │              │              │  Tool Loader  Skill Engine  Agent Runtime  Memory Engine  │              │              │              │  └──────────────┴──────────────┴──────────────┴──────────────┘                             │                     Internal Event Bus                             │         ┌────────────┬────────────┬────────────┐         │            │            │      GitHub      Browser      Filesystem         │            │            │       Gmail       Search      Calendar         │            │            │       Notion       SQL         REST APIs`  
+                       `Claude Mobile                             │                      MCP Super Connector                             │                   Plugin Runtime (Core)                             │  ┌──────────────┬──────────────┬──────────────┬──────────────┐  │              │              │              │  Tool Loader  Skill Engine  Agent Runtime  Memory Engine  │              │              │              │  └──────────────┴──────────────┴──────────────┴──────────────┘                             │                     Internal Event Bus                             │         ┌────────────┬────────────┬────────────┐         │            │            │      GitHub      Browser      Filesystem         │            │            │       Gmail       Search      Calendar         │            │            │       Notion       SQL         REST APIs`
 ```
 
 #### Kernel Components (`kernel/`)
@@ -281,7 +296,7 @@ interface Plugin {
 ### 5.2 Generation v2: Layered AI Kernel & Tool Execution Pipeline
 
 ```
-                      `Claude Mobile                            │                     Remote MCP Server                            │                  ┌─────────Gateway─────────┐                  │                         │           Authentication             Rate Limiter                  │                         │           Session Manager          Permission Engine                  └─────────┬───────────────┘                            │                       AI Kernel                            │      ┌───────────────┬───────────────┬───────────────┐      │               │               │  Plugin Engine   Agent Engine   Context Engine      │               │               │      └───────┬───────┴───────┬───────┘              │               │         Event Bus       Memory Engine              │               │       Connector Layer    Storage Layer`  
+                      `Claude Mobile                            │                     Remote MCP Server                            │                  ┌─────────Gateway─────────┐                  │                         │           Authentication             Rate Limiter                  │                         │           Session Manager          Permission Engine                  └─────────┬───────────────┘                            │                       AI Kernel                            │      ┌───────────────┬───────────────┬───────────────┐      │               │               │  Plugin Engine   Agent Engine   Context Engine      │               │               │      └───────┬───────┴───────┬───────┘              │               │         Event Bus       Memory Engine              │               │       Connector Layer    Storage Layer`
 ```
 
 #### AI Kernel Principles
@@ -321,7 +336,7 @@ config:
 ### 5.3 Generation v3: Microkernel Architecture & Deterministic Flow
 
 ```
-                     `Claude Mobile                           │                    Remote MCP Endpoint                           │                   ┌────── Gateway ──────┐                   │                     │              Authentication       Rate Limiter                   │                     │                   └─────────┬───────────┘                             │                      Microkernel Core                             │      ┌───────────┬──────────┼───────────┬───────────┐      │           │          │           │   Registry    Event Bus  Scheduler  Context Engine      │           │          │           │      └───────────┴──────────┴───────────┘                             │                    Plugin Runtime Layer                             │    ┌────────┬────────┬────────┬────────┬────────┐    │        │        │        │        │  Files   GitHub   Gmail   Browser   Database`  
+                     `Claude Mobile                           │                    Remote MCP Endpoint                           │                   ┌────── Gateway ──────┐                   │                     │              Authentication       Rate Limiter                   │                     │                   └─────────┬───────────┘                             │                      Microkernel Core                             │      ┌───────────┬──────────┼───────────┬───────────┐      │           │          │           │   Registry    Event Bus  Scheduler  Context Engine      │           │          │           │      └───────────┴──────────┴───────────┘                             │                    Plugin Runtime Layer                             │    ┌────────┬────────┬────────┬────────┬────────┐    │        │        │        │        │  Files   GitHub   Gmail   Browser   Database`
 ```
 
 #### Deterministic Runtime Pipeline
@@ -352,7 +367,7 @@ export interface Tool {
 ### 5.4 Generation v4: AI Application Platform
 
 ```
-                     `Claude Mobile                            │                    MCP Hub Connector                            │ ──────────────────────────────────────────────────────                   Claude OS Runtime ──────────────────────────────────────────────────────       Kernel      Registry      Plugin Runtime      Workflow Engine      Agent Runtime      Context Engine      Memory Engine      Permission Engine      Event Bus      Scheduler      Cache      Storage      Model Router  ──────────────────────────────────────────────────────  Plugins  Filesystem GitHub Calendar Gmail Slack Discord SQL Docker Browser Search OCR Vision RAG Automation  ──────────────────────────────────────────────────────  Infrastructure  SQLite Redis Vector DB Object Storage Cloud APIs`  
+                     `Claude Mobile                            │                    MCP Hub Connector                            │ ──────────────────────────────────────────────────────                   Claude OS Runtime ──────────────────────────────────────────────────────       Kernel      Registry      Plugin Runtime      Workflow Engine      Agent Runtime      Context Engine      Memory Engine      Permission Engine      Event Bus      Scheduler      Cache      Storage      Model Router  ──────────────────────────────────────────────────────  Plugins  Filesystem GitHub Calendar Gmail Slack Discord SQL Docker Browser Search OCR Vision RAG Automation  ──────────────────────────────────────────────────────  Infrastructure  SQLite Redis Vector DB Object Storage Cloud APIs`
 ```
 
 #### Module Types Taxonomy
@@ -373,7 +388,7 @@ export interface Tool {
 ### 5.5 Generation vX: Self-Describing, Self-Extensible AI-Native Runtime
 
 ```
-                    `Claude Mobile                          │                   MCP Hub Connector                          │ ───────────────────────────────────────────────                   AI Runtime Kernel  ───────────────────────────────────────────────   Registry  Discovery  Dependency Injection  Permissions  Event Bus  Context Manager  Scheduler  Cache  Logger  Config  Secret Manager  ───────────────────────────────────────────────   Module Runtime   Plugin  Agent  Skill  Workflow  Prompt  Widget  Connector  Memory  Model  Service  ───────────────────────────────────────────────   Infrastructure   Database  Object Storage  Search  Vector Store  Queue  External APIs`  
+                    `Claude Mobile                          │                   MCP Hub Connector                          │ ───────────────────────────────────────────────                   AI Runtime Kernel  ───────────────────────────────────────────────   Registry  Discovery  Dependency Injection  Permissions  Event Bus  Context Manager  Scheduler  Cache  Logger  Config  Secret Manager  ───────────────────────────────────────────────   Module Runtime   Plugin  Agent  Skill  Workflow  Prompt  Widget  Connector  Memory  Model  Service  ───────────────────────────────────────────────   Infrastructure   Database  Object Storage  Search  Vector Store  Queue  External APIs`
 ```
 
 #### Universal Module Interface
@@ -394,7 +409,7 @@ Every module advertises its capabilities, dependencies, permissions, schemas, an
 ### 5.6 Generation v5 / Next: Distributed AI Operating System
 
 ```
-                           `Claude Mobile                                 │                      Remote MCP Hub Connector                                 │ ══════════════════════════════════════════════════════                      Claude AI Operating System  ══════════════════════════════════════════════════════                       Intent Planner                            │                  Semantic Task Planner                            │                   Execution Orchestrator                            │ ──────────────────────────────────────────────────────  Runtime Services   Registry  Discovery  Dependency Resolver  Module Loader  Event Bus  Permission Engine  Context Manager  Workflow Engine  Agent Runtime  Model Router  Memory Engine  Scheduler  Secret Manager  Cache  Search  ──────────────────────────────────────────────────────  Module Ecosystem   Tools  Agents  Skills  Plugins  Widgets  Prompts  Resources  Connectors  Models  Pipelines  Services  ──────────────────────────────────────────────────────  Infrastructure   SQLite  PostgreSQL  Redis  Qdrant  Meilisearch  S3/R2  OAuth  External APIs`  
+                           `Claude Mobile                                 │                      Remote MCP Hub Connector                                 │ ══════════════════════════════════════════════════════                      Claude AI Operating System  ══════════════════════════════════════════════════════                       Intent Planner                            │                  Semantic Task Planner                            │                   Execution Orchestrator                            │ ──────────────────────────────────────────────────────  Runtime Services   Registry  Discovery  Dependency Resolver  Module Loader  Event Bus  Permission Engine  Context Manager  Workflow Engine  Agent Runtime  Model Router  Memory Engine  Scheduler  Secret Manager  Cache  Search  ──────────────────────────────────────────────────────  Module Ecosystem   Tools  Agents  Skills  Plugins  Widgets  Prompts  Resources  Connectors  Models  Pipelines  Services  ──────────────────────────────────────────────────────  Infrastructure   SQLite  PostgreSQL  Redis  Qdrant  Meilisearch  S3/R2  OAuth  External APIs`
 ```
 
 #### Capability-First Paradigm
@@ -411,7 +426,7 @@ Contains Manifest, Schemas, Agents, Tools, Prompts, Resources, Assets, Tests, an
 The ultimate evolution shifts Claude from the center to an **Adapter Layer**. The backend is a model-agnostic **Agentic-Native Runtime (ANR)** capable of serving Claude Mobile, ChatGPT, Gemini, Web Apps, Desktop CLI, VS Code, and messaging platforms.
 
 ```
-                    `CLIENTS  ┌─────────────────────────────────────────────┐  │ Claude │ ChatGPT │ Gemini │ Web │ CLI │ API │  └─────────────────────────────────────────────┘                       │           Adapter Layer (Thin)  ┌─────────────────────────────────────────────┐  │ MCP │ OpenAI │ Gemini │ REST │ WebSocket    │  └─────────────────────────────────────────────┘                       │ ═══════════════════════════════════════════════           Agentic-Native Runtime (ANR) ═══════════════════════════════════════════════   Kernel  ├── Registry  ├── Loader  ├── Router  ├── Permissions  ├── Lifecycle  ├── Config  └── Events   Runtime  ├── Planner  ├── Workflow Engine  ├── Scheduler  ├── Context Builder  ├── Memory  ├── Search  ├── Cache  └── Model Router   Capability Runtime  ├── Filesystem  ├── GitHub  ├── Gmail  ├── Calendar  ├── Browser  ├── SQL  ├── OCR  ├── Vision  ├── RAG  ├── Automation  └── Custom   Infrastructure  ├── SQLite  ├── Object Storage  ├── Queue  ├── Search  ├── Vector Store  └── OAuth`  
+                    `CLIENTS  ┌─────────────────────────────────────────────┐  │ Claude │ ChatGPT │ Gemini │ Web │ CLI │ API │  └─────────────────────────────────────────────┘                       │           Adapter Layer (Thin)  ┌─────────────────────────────────────────────┐  │ MCP │ OpenAI │ Gemini │ REST │ WebSocket    │  └─────────────────────────────────────────────┘                       │ ═══════════════════════════════════════════════           Agentic-Native Runtime (ANR) ═══════════════════════════════════════════════   Kernel  ├── Registry  ├── Loader  ├── Router  ├── Permissions  ├── Lifecycle  ├── Config  └── Events   Runtime  ├── Planner  ├── Workflow Engine  ├── Scheduler  ├── Context Builder  ├── Memory  ├── Search  ├── Cache  └── Model Router   Capability Runtime  ├── Filesystem  ├── GitHub  ├── Gmail  ├── Calendar  ├── Browser  ├── SQL  ├── OCR  ├── Vision  ├── RAG  ├── Automation  └── Custom   Infrastructure  ├── SQLite  ├── Object Storage  ├── Queue  ├── Search  ├── Vector Store  └── OAuth`
 ```
 
 ---
@@ -771,5 +786,5 @@ claudeos doctor               # Verify gateway health, tokens, and MCP endpoint
 
 ---
 
-*Document Version: v8 (Traceability Documentation & Wiki)*  
+*Document Version: v8 (Traceability Documentation & Wiki)*
 *Traceability Target Repository: Abdus2023/GAR-II (`arena/019f9179-gar-ii`)*
