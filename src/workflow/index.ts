@@ -52,7 +52,7 @@ export class WorkflowEngine {
     // Convert steps to ExecutionGraph format
     const nodes = workflow.steps.map(step => ({
       id: step.id,
-      type: step.tool ? 'tool' : 'agent',
+      type: (step.tool ? 'tool' : 'agent') as 'tool' | 'agent',
       tool: step.tool,
       agent: step.agent,
       input: { ...step.input, ...inputs },

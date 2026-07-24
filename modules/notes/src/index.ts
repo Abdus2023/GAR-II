@@ -96,7 +96,7 @@ export default class NotesModule implements Module {
       id: result.id,
       title: result.title,
       content: result.content,
-      tags: JSON.parse(result.tags),
+      tags: JSON.parse(result.tags || '[]'),
       updatedAt: result.updatedAt,
     }
   }
@@ -115,7 +115,7 @@ export default class NotesModule implements Module {
       results: results.map(r => ({
         id: r.id,
         title: r.title,
-        tags: JSON.parse(r.tags),
+        tags: JSON.parse(r.tags || '[]'),
         updatedAt: r.updatedAt,
       })),
     }
@@ -132,7 +132,7 @@ export default class NotesModule implements Module {
       notes: results.map(r => ({
         id: r.id,
         title: r.title,
-        tags: JSON.parse(r.tags),
+        tags: JSON.parse(r.tags || '[]'),
         updatedAt: r.updatedAt,
       })),
     }

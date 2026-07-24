@@ -61,3 +61,4 @@ export class Planner {
 }
 
 export const planner = new Planner()
+export { executor } from './executor'
