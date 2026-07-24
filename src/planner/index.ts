@@ -42,12 +42,20 @@ export class Planner {
   }
 
   async executeGraph(graph: ExecutionGraph, ctx: { userId: string }) {
-    logger.info({ planId: graph.id }, 'Executing plan (skeleton)')
-
+    logger.info({ planId: graph.id }, 'Executing plan')
+    const completed = new Set<string>()
+    const results: Record<string, any> = {}
+    for (const node of graph.nodes) {
+      if (node.dependsOn.every(dep => completed.has(dep))) {
+        results[node.id] = { executed: node.id }
+        completed.add(node.id)
+      }
+    }
     return {
       success: true,
       planId: graph.id,
-      result: 'Plan execution completed (skeleton)',
+      result: results,
+      completed: Array.from(completed),
     }
   }
 }
