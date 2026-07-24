@@ -25,8 +25,10 @@ Expose with Cloudflare Tunnel or ngrok, then add the URL at [claude.ai](https://
 
 All documentation lives in `docs/`:
 
-- `COMPREHENSIVE_TRACEABILITY_v7.md` — **Single source of truth** (Updated July 23, 2026)
-- `MODULE_DEVELOPMENT_GUIDE.md` — How to build modules
+- `WIKI_EXTENDED.md` — **Master Extended Wiki Portal & Component Index** (Parts 1–45)
+- `COMPREHENSIVE_TRACEABILITY_v9.md` — **Master Extended Source of Truth & Wiki Specs** (v9 - Updated July 24, 2026)
+- `WIKI.md` — Core Wiki Portal & Glossary
+- `MODULE_DEVELOPMENT_GUIDE.md` — How to build capability modules
 - `PLUGIN_DEVELOPMENT_GUIDE.md` — How to build Claude Code plugins
 - `DEPLOYMENT_GUIDE.md` — Local → Production
 - `API_REFERENCE.md` — Tool & kernel API reference
