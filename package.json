@@ -14,7 +14,7 @@
     "deploy:cloudflare": "wrangler deploy",
     "setup": "node -e \"require('fs').copyFileSync('.env.example', '.env', { force: false })\" || true",
     "quickstart": "npm run setup && npm run dev",
-    "test": "echo \"No tests yet\""
+    "test": "vitest run"
   },
   "dependencies": {
     "@lancedb/lancedb": "^0.31.0",
@@ -30,6 +30,7 @@
   "devDependencies": {
     "@types/node": "^22.0.0",
     "tsx": "^4.23.1",
-    "typescript": "^5.5.0"
+    "typescript": "^5.5.0",
+    "vitest": "^4.1.10"
   }
 }

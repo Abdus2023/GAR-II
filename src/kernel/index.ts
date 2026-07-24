@@ -88,13 +88,13 @@ class Kernel {
 
       return {
         success: true,
-        keyword_results: keywordResults.map(r => ({
+        keyword_results: keywordResults.map((r: any) => ({
           key: r.key,
           value: JSON.parse(r.value),
           updatedAt: r.updatedAt,
           source: 'keyword',
         })),
-        semantic_results: semanticResults.map(r => ({
+        semantic_results: semanticResults.map((r: any) => ({
           key: r.key,
           content: r.content,
           score: r.score,
@@ -148,7 +148,7 @@ class Kernel {
     return Array.from(this.modules.keys())
   }
 
-  on(event: string, handler: Function) {
+  on(event: string, handler: (...args: any[]) => void) {
     this.events.on(event, handler)
   }
 

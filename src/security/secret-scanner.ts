@@ -6,13 +6,13 @@
  */
 
 const SECRET_PATTERNS = [
-  { pattern: /sk-[a-zA-Z0-9]{32,}/g, name: 'Anthropic/OpenAI API Key' },
-  { pattern: /ghp_[a-zA-Z0-9]{36}/g, name: 'GitHub Personal Access Token' },
-  { pattern: /AKIA[A-Z0-9]{16}/g, name: 'AWS Access Key ID' },
-  { pattern: /-----BEGIN (RSA|EC|OPENSSH) PRIVATE KEY-----/g, name: 'Private Key' },
-  { pattern: /password\s*=\s*['"][^'"]{8,}/gi, name: 'Hardcoded Password' },
-  { pattern: /api[_-]?key\s*=\s*['"][^'"]{16,}/gi, name: 'Hardcoded API Key' },
-  { pattern: /secret\s*=\s*['"][^'"]{16,}/gi, name: 'Hardcoded Secret' },
+  { pattern: /sk-[a-zA-Z0-9]{32,}/, name: 'Anthropic/OpenAI API Key' },
+  { pattern: /ghp_[a-zA-Z0-9]{36}/, name: 'GitHub Personal Access Token' },
+  { pattern: /AKIA[A-Z0-9]{16}/, name: 'AWS Access Key ID' },
+  { pattern: /-----BEGIN (RSA|EC|OPENSSH) PRIVATE KEY-----/, name: 'Private Key' },
+  { pattern: /password\s*=\s*['"][^'"]{8,}/i, name: 'Hardcoded Password' },
+  { pattern: /api[_-]?key\s*=\s*['"][^'"]{16,}/i, name: 'Hardcoded API Key' },
+  { pattern: /secret\s*=\s*['"][^'"]{16,}/i, name: 'Hardcoded Secret' },
 ]
 
 export interface ScanResult {

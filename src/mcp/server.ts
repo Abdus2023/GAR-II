@@ -1,6 +1,6 @@
 import { Hono } from 'hono'
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
-import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js'
+import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js'
 import { z } from 'zod'
 import { kernel } from '../kernel'
 import { validateAuth } from '../auth/middleware'
@@ -43,6 +43,7 @@ mcpServer.tool(
     }
 
     try {
+      let result: any
       // Built-in help
       if (action === 'help' || action === 'list' || action === 'actions') {
         const tools = kernel.getRegisteredTools()
@@ -283,15 +284,11 @@ mcpServer.resource(
 )
 
 mcpRouter.all('/', validateAuth, async (c) => {
-  const transport = new StreamableHTTPServerTransport({
+  const transport = new WebStandardStreamableHTTPServerTransport({
     sessionIdGenerator: () => crypto.randomUUID(),
   })
 
   await mcpServer.connect(transport)
 
-  const response = await transport.handle(c.req.raw)
-  return new Response(response.body, {
-    status: response.status,
-    headers: response.headers,
-  })
+  return transport.handleRequest(c.req.raw)
 })
