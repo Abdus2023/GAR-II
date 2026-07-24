@@ -16,6 +16,10 @@ export const validateAuth = createMiddleware(async (c, next) => {
     return c.json({ error: 'Missing authorization' }, 401)
   }
 
+  if (process.env.NODE_ENV !== 'development' && (!process.env.JWT_SECRET || process.env.JWT_SECRET === 'dev-secret')) {
+    return c.json({ error: 'Server misconfiguration: JWT_SECRET not set' }, 500)
+  }
+
   const token = authHeader.slice(7)
 
   try {

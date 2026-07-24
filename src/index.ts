@@ -34,11 +34,13 @@ app.route('/health', healthRouter)
 app.route('/', discoveryRouter)
 
 // Start kernel and skills
-await kernel.start()
-await skillRuntime.loadFromDirectory('./.claude/skills')
-
-// Initialize semantic memory (L3)
-await semanticMemory.initialize()
+try {
+  await kernel.start()
+  await skillRuntime.loadFromDirectory('./.claude/skills')
+  await semanticMemory.initialize()
+} catch (err: any) {
+  logger.error({ err }, 'Initialization failed')
+}
 
 // Register tools for semantic search (Phase 2 + Phase 3)
 const registeredTools = [

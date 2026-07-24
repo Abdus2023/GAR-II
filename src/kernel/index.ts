@@ -1,6 +1,6 @@
 import { EventEmitter } from 'eventemitter3'
 import { logger } from '../logger'
-import { db, memory } from '../database'
+import { db, memory, toolCalls } from '../database'
 import { semanticMemory } from '../memory/semantic'
 import { eq, and, like } from 'drizzle-orm'
 import type { Module, ModuleContext } from './types'
@@ -123,7 +123,7 @@ class Kernel {
       })
 
       // Audit log
-      await db.insert(require('../database').toolCalls).values({
+      await db.insert(toolCalls).values({
         userId: ctx.userId,
         toolId: action,
         action,

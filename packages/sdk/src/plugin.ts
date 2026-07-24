@@ -28,6 +28,15 @@ export interface Plugin {
   shutdown?(): Promise<void>
 }
 
+export abstract class BasePlugin implements Plugin {
+  abstract manifest(): PluginManifest
+  async initialize(ctx: PluginContext): Promise<void> {}
+  tools?(): any[] { return [] }
+  resources?(): any[] { return [] }
+  prompts?(): any[] { return [] }
+  async shutdown?(): Promise<void> {}
+}
+
 export interface PluginSDK {
   register(plugin: Plugin): void
   list(): PluginManifest[]
