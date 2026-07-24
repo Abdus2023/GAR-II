@@ -1,0 +1,28 @@
+id: search
+kind: connector
+version: 1.0.0
+author: "Claude Hub"
+category: search
+description: "Unified search across memory, notes, files, and web"
+
+permissions:
+  - search.internal
+  - search.web
+
+dependencies:
+  - auth
+  - memory
+  - notes
+
+tools:
+  - id: query
+    description: Search across all connected data sources
+    input:
+      query: { type: string }
+      sources: { type: array, items: { type: string }, default: ["memory", "notes"] }
+    cost: medium
+    latency: medium
+
+events: []
+
+prompts: []

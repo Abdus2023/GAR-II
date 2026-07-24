@@ -1,0 +1,26 @@
+# Example Workflow: Research + Summarize
+
+id: research_and_summarize
+name: Research and Summarize
+description: Search for information and create a concise summary
+
+steps:
+  - id: search
+    tool: search.query
+    input:
+      query: "{{query}}"
+      sources: ["memory", "notes"]
+
+  - id: summarize
+    agent: researcher
+    input:
+      task: "Create a clear summary of the search results"
+    dependsOn: ["search"]
+
+  - id: save_note
+    tool: notes.create
+    input:
+      title: "Research: {{query}}"
+      content: "{{summarize.result}}"
+      tags: ["research", "auto"]
+    dependsOn: ["summarize"]

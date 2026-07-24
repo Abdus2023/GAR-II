@@ -1,0 +1,51 @@
+id: filesystem
+kind: connector
+version: 1.0.0
+author: "Claude Hub"
+category: storage
+description: "Read, write, list, and search files in the workspace"
+
+permissions:
+  - filesystem.read
+  - filesystem.write
+
+dependencies:
+  - auth
+
+tools:
+  - id: read_file
+    description: Read the contents of a file
+    input:
+      path: { type: string }
+    cost: low
+    latency: low
+
+  - id: write_file
+    description: Write or overwrite a file
+    input:
+      path: { type: string }
+      content: { type: string }
+    cost: low
+    latency: low
+    requires_confirmation: true
+
+  - id: list_directory
+    description: List files and folders in a directory
+    input:
+      path: { type: string, default: "." }
+    cost: low
+    latency: low
+
+  - id: search_files
+    description: Search for files by name or content (simple)
+    input:
+      query: { type: string }
+    cost: medium
+    latency: medium
+
+events:
+  emits:
+    - filesystem:file_written
+    - filesystem:file_read
+
+prompts: []

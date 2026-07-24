@@ -1,0 +1,31 @@
+name = "claude-hub"
+main = "src/index.ts"
+compatibility_date = "2026-07-01"
+compatibility_flags = ["nodejs_compat"]
+
+[build]
+command = "npm run build"
+
+[vars]
+NODE_ENV = "production"
+
+# Secrets (set via: wrangler secret put <NAME>)
+# JWT_SECRET
+# TURSO_AUTH_TOKEN
+# GITHUB_TOKEN (optional)
+
+[[d1_databases]]
+binding = "DB"
+database_name = "claude-hub"
+database_id = "your-database-id-here"
+
+[[r2_buckets]]
+binding = "STORAGE"
+bucket_name = "claude-hub-storage"
+
+[observability]
+enabled = true
+head_sampling_rate = 0.1
+
+[limits]
+cpu_ms = 50
