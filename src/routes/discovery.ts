@@ -1,11 +1,12 @@
 import { Hono } from 'hono'
+import { config } from '../config'
 import { kernel } from '../kernel'
 
 export const discoveryRouter = new Hono()
 
 // MCP Server Card (SEP-1649)
 discoveryRouter.get('/.well-known/mcp/server-card.json', (c) => {
-  const baseUrl = process.env.MCP_SERVER_URL || 'http://localhost:3000'
+  const baseUrl = config.mcpServerUrl
 
   return c.json({
     id: 'claude-hub',
@@ -33,7 +34,7 @@ discoveryRouter.get('/.well-known/mcp/server-card.json', (c) => {
 })
 
 discoveryRouter.get('/.well-known/oauth-protected-resource', (c) => {
-  const baseUrl = process.env.MCP_SERVER_URL || 'http://localhost:3000'
+  const baseUrl = config.mcpServerUrl
   return c.json({
     resource: baseUrl,
     authorization_servers: [baseUrl],

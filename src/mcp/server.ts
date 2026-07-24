@@ -2,34 +2,94 @@ import { Hono } from 'hono'
 import { McpServer, ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js'
 import { z } from 'zod'
+import { serializeGatewayError } from '../errors'
 import { kernel } from '../kernel'
 import { validateAuth } from '../auth/middleware'
 import { logger } from '../logger'
+import { getCurrentUserId, runWithRequestContext } from '../request-context'
 import { contextBudget } from '../context/budget'
 import { skillRuntime } from '../skills/runtime'
-import { scanForSecrets } from '../security/secret-scanner'
 import { toolSearch } from '../search/tool-search'
 import { planner, executor } from '../planner'
 import { agentRuntime } from '../agents'
 import { workflowEngine } from '../workflow'
+import { config } from '../config'
+import { McpSessionStore } from './session-store'
 
 export const mcpRouter = new Hono()
 
-const mcpServer = new McpServer({
-  name: 'claude-hub',
-  version: '0.1.0',
+interface McpSession {
+  server: McpServer
+  transport: WebStandardStreamableHTTPServerTransport
+}
+
+const mcpSessions = new McpSessionStore<McpSession>({
+  ttlMs: config.mcpSessionTtlMs,
+  maxSessions: config.mcpMaxSessions,
+  onEvict: (_sessionId, session) => session.transport.close(),
 })
 
+interface WorkspaceSchemaCache {
+  registryVersion: number
+  showing: number
+  text: string
+}
+
+let workspaceSchemaCache: WorkspaceSchemaCache | null = null
+
+function getWorkspaceSchemaText() {
+  const registryVersion = kernel.getRegistryVersion()
+
+  if (workspaceSchemaCache?.registryVersion === registryVersion) {
+    contextBudget.setToolSchemaCost(workspaceSchemaCache.showing)
+    return workspaceSchemaCache.text
+  }
+
+  const allTools = kernel.getRegisteredTools()
+  const maxTools = contextBudget.getMaxToolsForContext(allTools.length)
+  const selectedToolNames = allTools.slice(0, maxTools)
+  contextBudget.setToolSchemaCost(selectedToolNames.length)
+
+  const text = JSON.stringify({
+    available_actions: selectedToolNames,
+    total_available: allTools.length,
+    showing: selectedToolNames.length,
+    note: selectedToolNames.length < allTools.length
+      ? 'Context budget active — not all tools shown. Use _search_tools(query) to discover relevant tools.'
+      : 'All tools shown within context budget.',
+    modules: kernel.getLoadedModules(),
+    context_budget: contextBudget.getStatus(),
+    skills: skillRuntime.listSkills(),
+    tool_search_enabled: true,
+    registry_version: registryVersion,
+    recommendation: 'For best results, use _search_tools before calling workspace with complex actions.',
+  }, null, 2)
+
+  workspaceSchemaCache = {
+    registryVersion,
+    showing: selectedToolNames.length,
+    text,
+  }
+
+  return text
+}
+
+function createMcpServer() {
+  const server = new McpServer({
+    name: 'claude-hub',
+    version: '0.1.0',
+  })
+
 // The single "workspace" tool that Claude sees
-mcpServer.tool(
+server.tool(
   'workspace',
-  'Unified workspace access. Supported: memory.*, github.*, filesystem.*, notes.*, search.*. Use _search_tools(query) to discover relevant tools.',
+  'Unified workspace access. Actions are dynamically loaded from the kernel. Use help/list or _search_tools(query) to discover relevant tools.',
   {
     action: z.string().describe('The action or module to use'),
     params: z.record(z.any()).optional().describe('Action parameters'),
   },
   async ({ action, params = {} }, extra) => {
-    const userId = 'default' // Simplified for Phase 1
+    const userId = getCurrentUserId()
 
     logger.info({ action, userId }, 'Tool invoked')
 
@@ -120,30 +180,16 @@ mcpServer.tool(
         }
       }
 
-      // Security: Scan for secrets in write operations
-      const writeActions = ['memory.set', 'files.write', 'github.create_issue']
-      if (writeActions.includes(action) && params.content) {
-        const secretCheck = scanForSecrets(params.content)
-        if (secretCheck.blocked) {
-          logger.warn({ action, userId, pattern: secretCheck.pattern }, 'Secret detected in write operation')
-          return {
-            content: [{
-              type: 'text',
-              text: `Blocked: ${secretCheck.reason}`,
-            }],
-            isError: true,
-          }
-        }
-      }
-
-      // Support module routing (github, filesystem, notes, search)
-      const knownModules = ['github', 'filesystem', 'notes', 'search']
-      if (params.action && knownModules.includes(action)) {
-        const moduleAction = `${action}.${params.action}`
+      const nestedModuleAction = typeof params.action === 'string' && kernel.hasModule(action)
+        ? `${action}.${params.action}`
+        : null
+      // Support dynamic module routing: workspace({ action: 'notes', params: { action: 'list' } })
+      // maps to kernel action notes.list. Direct actions such as notes.list still work too.
+      if (nestedModuleAction) {
         const moduleParams = { ...params }
         delete moduleParams.action
-        result = await kernel.invoke(moduleAction, moduleParams, { userId })
-      } 
+        result = await kernel.invoke(nestedModuleAction, moduleParams, { userId })
+      }
       // Direct action
       else {
         result = await kernel.invoke(action, params, { userId })
@@ -160,11 +206,15 @@ mcpServer.tool(
         }],
       }
     } catch (error: any) {
-      logger.error({ action, error: error.message }, 'Tool execution failed')
+      const serializedError = serializeGatewayError(error)
+      logger.error({ action, error: serializedError }, 'Tool execution failed')
       return {
         content: [{
           type: 'text',
-          text: `Error: ${error.message}`,
+          text: JSON.stringify({
+            success: false,
+            error: serializedError,
+          }, null, 2),
         }],
         isError: true,
       }
@@ -173,11 +223,11 @@ mcpServer.tool(
 )
 
 // Tool Search meta-tool (Phase 2 — dynamic discovery)
-mcpServer.tool(
+server.tool(
   '_search_tools',
   'Search for available tools by description. Use this when you need to discover new capabilities before calling them.',
   {
-    query: z.string().describe('What you want to do (e.g. "review a pull request" or "search github")'),
+    query: z.string().describe('What you want to do (e.g. "read a file" or "search notes")'),
     limit: z.number().default(5).describe('Maximum number of tools to return'),
   },
   async ({ query, limit = 5 }) => {
@@ -188,7 +238,7 @@ mcpServer.tool(
       let example = ''
       const [module, actionName] = tool.id.split('.')
 
-      if (module === 'github' || module === 'filesystem' || module === 'notes' || module === 'search') {
+      if (actionName && kernel.hasModule(module)) {
         example = `workspace({ action: "${module}", params: { action: "${actionName}", ... } })`
       } else if (module === 'memory') {
         example = `workspace({ action: "${tool.id}", params: { key: "...", value: "..." } })`
@@ -221,40 +271,20 @@ mcpServer.tool(
 )
 
 // Schema + Budget + Tool Search resource (respects context budget)
-mcpServer.resource(
+server.resource(
   'workspace-schema',
   'workspace://schema',
-  async () => {
-    const allTools = kernel.getRegisteredTools()
-    const maxTools = contextBudget.getMaxToolsForContext(allTools.length)
-    
-    // Select top tools (currently simple slice, can be improved with relevance)
-    const selectedToolNames = allTools.slice(0, maxTools)
-
-    return {
-      contents: [{
-        uri: 'workspace://schema',
-        mimeType: 'application/json',
-        text: JSON.stringify({
-          available_actions: selectedToolNames,
-          total_available: allTools.length,
-          showing: selectedToolNames.length,
-          note: selectedToolNames.length < allTools.length 
-            ? 'Context budget active — not all tools shown. Use _search_tools(query) to discover relevant tools.'
-            : 'All tools shown within context budget.',
-          modules: kernel.getLoadedModules(),
-          context_budget: contextBudget.getStatus(),
-          skills: skillRuntime.listSkills(),
-          tool_search_enabled: true,
-          recommendation: 'For best results, use _search_tools before calling workspace with complex actions.',
-        }, null, 2),
-      }],
-    }
-  }
+  async () => ({
+    contents: [{
+      uri: 'workspace://schema',
+      mimeType: 'application/json',
+      text: getWorkspaceSchemaText(),
+    }],
+  })
 )
 
 // Skills as MCP Resources
-mcpServer.resource(
+server.resource(
   'list-skills',
   'skills://list',
   async () => ({
@@ -266,7 +296,7 @@ mcpServer.resource(
   })
 )
 
-mcpServer.resource(
+server.resource(
   'skill-content',
   new ResourceTemplate('skills://{name}', { list: undefined }),
   async (uri, { name }) => {
@@ -283,12 +313,44 @@ mcpServer.resource(
   }
 )
 
+  return server
+}
+
 mcpRouter.all('/', validateAuth, async (c) => {
-  const transport = new WebStandardStreamableHTTPServerTransport({
-    sessionIdGenerator: () => crypto.randomUUID(),
-  })
+  mcpSessions.cleanupExpired()
+  const sessionId = c.req.header('mcp-session-id')
+  let session = sessionId ? mcpSessions.get(sessionId) : undefined
 
-  await mcpServer.connect(transport)
+  if (sessionId && !session) {
+    return c.json({ error: 'Unknown MCP session' }, 404)
+  }
 
-  return transport.handleRequest(c.req.raw)
+  if (!session) {
+    const server = createMcpServer()
+    let createdSession!: McpSession
+    const transport = new WebStandardStreamableHTTPServerTransport({
+      sessionIdGenerator: () => crypto.randomUUID(),
+      enableJsonResponse: true,
+      onsessioninitialized: initializedSessionId => {
+        mcpSessions.set(initializedSessionId, createdSession)
+      },
+      onsessionclosed: closedSessionId => {
+        mcpSessions.delete(closedSessionId)
+      },
+    })
+    createdSession = { server, transport }
+    session = createdSession
+    await server.connect(transport)
+  }
+
+  const userId = c.get('userId' as never) as string | undefined
+  const correlationId = c.get('correlationId' as never) as string | undefined
+
+  return runWithRequestContext(
+    {
+      userId: userId || 'anonymous',
+      correlationId,
+    },
+    () => session.transport.handleRequest(c.req.raw)
+  )
 })

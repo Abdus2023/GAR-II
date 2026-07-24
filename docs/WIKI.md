@@ -1,8 +1,9 @@
 # Claude OS / Agentic-Native Runtime (ANR) — Master Documentation Wiki
+> **Current implementation status:** Use [`COMPREHENSIVE_TRACEABILITY_v10.md`](./COMPREHENSIVE_TRACEABILITY_v10.md) for the current code-to-requirement matrix. Older v8/v9 wiki material is retained as target-state architecture reference.
 
 Welcome to the official **Markdown Wiki and Traceability Documentation Portal** for **Claude OS / Agentic-Native Runtime (ANR)**.
 
-This wiki serves as the authoritative single source of truth for architectural evolution, protocols, security mandates, capability schemas, multi-agent orchestration, and production operations.
+This wiki is a navigation portal. For current implementation status, use `COMPREHENSIVE_TRACEABILITY_v10.md`; older traceability/wiki documents may describe target-state architecture.
 
 ---
 
@@ -14,13 +15,13 @@ This wiki serves as the authoritative single source of truth for architectural e
     ┌──────────────────┬──────────────────┼──────────────────┬──────────────────┐
     │                  │                  │                  │                  │
     ▼                  ▼                  ▼                  ▼                  ▼
-[Traceability v8]  [Architecture]    [Security Guide]    [Roadmap & Plan]   [Getting Started]
-  (Master Specs)    (Deep Dive)        (Threat Model)     (Phases 1 - 5)     (Setup & Connect)
+[Traceability v10]  [Architecture]    [Security Guide]    [Roadmap & Plan]   [Getting Started]
+  (Current Matrix)    (Deep Dive)        (Threat Model)     (Phases 1 - 5)     (Setup & Connect)
 ```
 
 ### Core Wiki Pages
 
-* **[Comprehensive Traceability Wiki v8](./COMPREHENSIVE_TRACEABILITY_v8.md)** — **Primary Single Source of Truth**. Contains complete requirement mappings, ground truths, architecture diagrams, tool stack specifications, security checklists, manifest standards, and API definitions.
+* **[Comprehensive Traceability v10](./COMPREHENSIVE_TRACEABILITY_v10.md)** — **Current implementation traceability matrix**. Maps implemented code, tests, endpoints, security controls, known gaps, and production blockers.
 * **[Architecture Reference](./ARCHITECTURE.md)** — Deep-dive into the microkernel runtime, execution DAG scheduler, and memory engine.
 * **[Security Architecture & Threat Model](./SECURITY.md)** — Confused-deputy attack mitigation, OAuth 2.0 DCR, state validation, and Secret Scanner protocols.
 * **[Phased Development Roadmap](./ROADMAP.md)** — Milestone breakdown from Phase 1 (Foundation) through Phase 5 (Marketplace).

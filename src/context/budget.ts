@@ -44,15 +44,53 @@ export class ContextBudgetManager {
   }
 
   /**
-   * Selects the most relevant tools to expose (placeholder for future semantic ranking)
+   * Selects the most relevant tools to expose.
+   *
+   * This intentionally stays lightweight: it ranks by lexical overlap across tool id,
+   * description, and optional category/cost metadata. A future embedding model can
+   * replace the scorer without changing callers.
    */
-  selectToolsForContext<T extends { id: string; description: string }>(
+  selectToolsForContext<T extends { id: string; description: string; category?: string; cost?: string }>(
     tools: T[],
-    maxTools: number = MAX_TOOLS_IN_CONTEXT
+    maxTools: number = MAX_TOOLS_IN_CONTEXT,
+    query?: string
   ): T[] {
-    // For now: simple strategy — take the first N tools
-    // Future: implement semantic similarity ranking based on user message
-    return tools.slice(0, maxTools)
+    if (!query?.trim()) {
+      return tools.slice(0, maxTools)
+    }
+
+    const normalizedQuery = query.toLowerCase()
+    const terms = normalizedQuery
+      .split(/[^a-z0-9_.-]+/)
+      .map(term => term.trim())
+      .filter(term => term.length > 2)
+
+    const scored = tools.map((tool, index) => {
+      const id = tool.id.toLowerCase()
+      const description = tool.description.toLowerCase()
+      const category = tool.category?.toLowerCase() || ''
+      let score = 0
+
+      if (id === normalizedQuery) score += 10
+      if (id.includes(normalizedQuery)) score += 6
+      if (description.includes(normalizedQuery)) score += 4
+      if (category.includes(normalizedQuery)) score += 2
+
+      for (const term of terms) {
+        if (id.includes(term)) score += 3
+        if (description.includes(term)) score += 2
+        if (category.includes(term)) score += 1
+      }
+
+      if (tool.cost === 'low') score += 0.25
+
+      return { tool, score, index }
+    })
+
+    return scored
+      .sort((a, b) => b.score - a.score || a.index - b.index)
+      .slice(0, maxTools)
+      .map(entry => entry.tool)
   }
 
   /**

@@ -1,100 +1,121 @@
 # Claude Hub Gateway — Project Status
 
-**Version**: 0.1.0 (Phase 1 Complete)  
-**Date**: July 23, 2026  
-**Status**: Production-ready foundation
+**Version**: 0.1.x stabilized prototype
+**Date**: July 24, 2026
+**Status**: Buildable, testable, dynamically wired prototype; not yet production-hardened for untrusted multi-tenant use.
 
 ---
 
-## Architecture Implemented
+## Summary
 
-### Core Principles (All Delivered)
-1. **One Hub Gateway** — Single `workspace` tool visible to Claude
-2. **Capability-first design** — Modules register tools dynamically
-3. **Skills + MCP separation** — Progressive disclosure (30-50 tokens)
-4. **Context safety** — Budget manager enforces ≤10 tools
-5. **Security by design** — Rate limiting + secret scanner + audit logging
-6. **Model-agnostic** — Thin adapter ready for future frontends
+GAR-II now has a working runtime foundation: the MCP gateway builds, starts, loads capability modules dynamically, exposes tools through the kernel, runs workflows, issues OAuth tokens, records audit logs, serves a dashboard, and includes automated tests.
+
+The project should no longer be described as “all phases complete” or fully production-ready. Several major production requirements remain, especially sandboxing, module signing, full Playwright browser automation and richer calendar OAuth flows, and OpenTelemetry.
 
 ---
 
 ## What Is Working Today
 
-### Tools (via `workspace` action)
-| Tool | Status | Description |
-|------|--------|-------------|
-| `echo` | ✅ | Basic connectivity test |
-| `memory.set` / `memory.get` / `memory.search` | ✅ | Persistent per-user memory (SQLite) |
-| `github.search_repo` | ✅ | Search GitHub repositories |
-| `github.read_file` | ✅ | Read files from any repository |
-| `github.review_pr` | ✅ | Fetch PR + full diff for review |
+### Core Runtime
 
-### Skills (Progressive Disclosure)
-| Skill | Status | Trigger |
-|-------|--------|---------|
-| `pr-review` | ✅ | "review this pr", "security review" |
-| `incident-response` | ✅ | "we have an incident", "production is down" |
+- Hono application with MCP Streamable HTTP route.
+- Explicit bootstrap and Node HTTP adapter.
+- Dynamic capability module loader.
+- Kernel tool registry with namespaced actions.
+- Kernel invocation hooks: `beforeInvoke`, `afterInvoke`, `onInvokeError`.
+- Structured `GatewayError` error model.
+- Async audit logging queue.
+- Runtime database migrations.
 
-### Infrastructure
-- Server Cards (`/.well-known/mcp/server-card.json`)
-- Rate limiting (60 req/min with headers)
-- Context Budget Manager (85%/95% warnings)
-- Secret scanner (blocks credential leaks)
-- Dynamic module loading
-- Full audit logging ready
+### Modules and Tools
+
+| Module | Status | Notes |
+|---|---|---|
+| `echo` | Functional | Connectivity/test tool |
+| `memory` | Functional | Built-in `memory.set`, `memory.get`, `memory.search` |
+| `filesystem` | Functional | Workspace-contained read/write/list/search |
+| `github` | Functional | Search repos, read files, review PRs |
+| `notes` | Functional | DB-backed create/get/list/search |
+| `search` | Functional | Internal memory/notes search |
+| `browser` | Skeleton | Placeholder responses only |
+| `calendar` | Functional with token | Google Calendar REST list/create events |
+
+### Security and Auth
+
+- DB-backed OAuth dynamic client registration.
+- Token endpoint validates client secret hashes.
+- Strict JWT audience/subject/expiration validation.
+- Kernel-level secret scanning for write actions.
+- AST-assisted secret scanner.
+- Request body size limit for API routes.
+- Rate limiter with memory and optional Upstash Redis store.
+- Request correlation IDs.
+
+### Memory and Workflow
+
+- SQLite/libSQL L2 memory.
+- LanceDB semantic memory with local hashing embeddings and optional API embedding provider.
+- Embedding cache.
+- DAG executor with dependency validation and timeouts.
+- Registered and ad-hoc workflow execution over HTTP.
+- CLI workflow runner.
+
+### Developer Experience
+
+- `npm run build`
+- `npm test`
+- `npm run db:migrate`
+- `npm run build:sdk`
+- GitHub Actions CI.
+- Runtime dashboard at `/dashboard`.
+- Typed SDK package structure under `packages/sdk`.
 
 ---
 
-## Project Structure
+## Validation Snapshot
 
-```
-claude-hub/
-├── src/
-│   ├── index.ts              # Entry point
-│   ├── mcp/server.ts         # MCP protocol handler
-│   ├── kernel/               # Module loader + registry
-│   ├── context/budget.ts     # Token management
-│   ├── skills/runtime.ts     # Progressive disclosure
-│   ├── security/secret-scanner.ts
-│   ├── auth/
-│   ├── database/
-│   ├── middleware/
-│   └── routes/
-├── modules/
-│   └── github/               # Real external integration
-├── .claude/skills/
-│   ├── pr-review/
-│   └── incident-response/
-├── deployment/cloudflare/
-├── docs/                     # 14 comprehensive documents
-└── STATUS.md
-```
-
----
-
-## How to Use
+Latest local validation:
 
 ```bash
-npm install
-npm run dev
+git diff --check
+npm run build
+npm run build:sdk
+npm test
+npm run db:migrate
 ```
 
-Expose with Cloudflare Tunnel or ngrok, then add the URL at claude.ai.
+Current automated test status:
 
-See `HOW_TO_TEST.md` for detailed testing instructions.
-
----
-
-## Next Priorities
-
-| Priority | Task | Impact |
-|----------|------|--------|
-| 1 | Test with real Claude | Validate end-to-end |
-| 2 | Deploy to Cloudflare Workers | Move to production |
-| 3 | Add more Skills | Rapid capability expansion |
-| 4 | Write tests | Increase confidence |
-| 5 | Implement Hooks | Complete extension surface |
+```text
+17 test files passed
+38 tests passed
+```
 
 ---
 
-**This is a complete, professional-grade foundation** that implements every major architectural decision from the original comprehensive design. The system is ready for real usage and further extension.
+## Key Limitations
+
+- Browser module is not a real Playwright/browserless implementation yet.
+- Calendar module is not connected to Google Calendar yet.
+- Untrusted module sandboxing is not implemented.
+- Cryptographic module signing/verification is not implemented.
+- OpenTelemetry export is not implemented.
+- Enterprise RBAC/policy controls are incomplete.
+- Cloudflare Workers deployment path needs validation after the Node adapter/runtime changes.
+
+---
+
+## Recommended Next Priorities
+
+| Priority | Task | Reason |
+|---:|---|---|
+| 1 | Implement sandbox/worker isolation for untrusted modules | Blocks safe third-party ecosystem |
+| 2 | Add module signing and verification | Prevents malicious module injection |
+| 3 | Complete browser and calendar modules | Converts skeleton capabilities into real value |
+| 4 | Add OpenTelemetry traces/metrics | Production observability |
+| 5 | Validate Cloudflare Workers deployment | Confirms edge/serverless target |
+| 6 | Add release automation | Prepares SDK/CLI publishing |
+
+---
+
+This is now a credible engineering foundation for the Claude Hub Gateway vision, with remaining work focused on production hardening, real-world integrations, and ecosystem safety.

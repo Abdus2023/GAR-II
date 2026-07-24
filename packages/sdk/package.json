@@ -1,0 +1,34 @@
+{
+  "name": "@claude-hub/sdk",
+  "version": "0.1.0",
+  "description": "Typed plugin SDK for Claude Hub Gateway capability extensions",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./plugin": {
+      "types": "./dist/plugin.d.ts",
+      "import": "./dist/plugin.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "clean": "rm -rf dist"
+  },
+  "keywords": [
+    "claude",
+    "mcp",
+    "plugins",
+    "capabilities"
+  ],
+  "license": "MIT",
+  "sideEffects": false
+}
