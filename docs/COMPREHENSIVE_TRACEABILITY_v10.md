@@ -29,7 +29,7 @@ It is **not yet fully production-ready for untrusted multi-tenant use**. The lar
 | Security | Hardened prototype | OAuth, JWT checks, secret scanning, confirmation gates, module signing support. |
 | Production isolation | Incomplete | No VM/worker sandbox for untrusted code yet. |
 | Observability | Good prototype | Pino, correlation IDs, audit queue, dashboard, metrics, OTLP trace exporter. |
-| Release ecosystem | Started | SDK package structure and release workflow exist; npm publish is opt-in/commented. |
+| Release ecosystem | Started | SDK package structure exists; CI/release workflow files are pending repository workflow permission. |
 
 ---
 
@@ -48,7 +48,7 @@ It is **not yet fully production-ready for untrusted multi-tenant use**. The lar
 | CLI | `packages/cli/src/index.ts` |
 | SDK | `packages/sdk/src/index.ts`, `packages/sdk/src/plugin.ts` |
 | Tests | `tests/*` |
-| CI/release | `.github/workflows/ci.yml`, `.github/workflows/release.yml` |
+| CI/release | Pending repository workflow permission; use `npm run build`, `npm run build:sdk`, `npm test` locally |
 
 ---
 
@@ -161,8 +161,8 @@ It is **not yet fully production-ready for untrusted multi-tenant use**. The lar
 | Dashboard | Protected HTML + JSON dashboard | Implemented | `src/routes/dashboard.ts`, `tests/dashboard.test.ts` |
 | Prometheus metrics | Protected `/metrics` endpoint | Implemented | `src/routes/metrics.ts`, `tests/metrics.test.ts` |
 | OTLP traces | Lightweight OTLP/HTTP exporter | Implemented optional | `src/telemetry/index.ts`, `tests/telemetry.test.ts` |
-| CI | Build/test workflow | Implemented | `.github/workflows/ci.yml` |
-| Release workflow | Tag-triggered release + SDK pack | Implemented | `.github/workflows/release.yml` |
+| CI | Build/test workflow | Pending workflow permission | Local commands: `npm run build`, `npm test` |
+| Release workflow | Tag-triggered release + SDK pack | Pending workflow permission | SDK can be packed with `npm pack ./packages/sdk` |
 
 ### 4.10 Developer Ecosystem
 

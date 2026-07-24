@@ -66,7 +66,7 @@ The project should no longer be described as “all phases complete” or fully 
 - `npm test`
 - `npm run db:migrate`
 - `npm run build:sdk`
-- GitHub Actions CI.
+- Build/test commands are automated locally; GitHub Actions workflow files still require repository workflow permission before they can be added.
 - Runtime dashboard at `/dashboard`.
 - Typed SDK package structure under `packages/sdk`.
 

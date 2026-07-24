@@ -22,7 +22,7 @@ At the time of v7, the project had early MCP gateway structure, documentation, a
 - DB-backed OAuth was added,
 - runtime migrations were added,
 - MCP session handling was fixed and e2e-tested,
-- dashboard, metrics, telemetry, CLI, SDK, and release workflows were added,
+- dashboard, metrics, telemetry, CLI, and SDK structure were added; CI/release workflows remain pending repository workflow permission,
 - tests expanded to 28 files / 62 passing tests.
 
 Do not use this v7 document for current implementation status.

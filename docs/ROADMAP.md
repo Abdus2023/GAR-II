@@ -23,7 +23,7 @@ The repository now has a working TypeScript foundation with dynamic modules, a r
 - Request correlation IDs, body-size limit, rate limiter with optional Upstash Redis store.
 - Runtime dashboard at `/dashboard`.
 - Typed SDK package structure for `@claude-hub/sdk`.
-- Automated tests and GitHub Actions CI.
+- Automated tests are in place; GitHub Actions CI remains pending repository workflow permission.
 
 ### Still Incomplete
 

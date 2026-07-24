@@ -39,7 +39,7 @@ Then expose the local server with Cloudflare Tunnel or ngrok and connect Claude 
 - **Security hooks:** kernel-level pre/post/error hooks, AST-assisted secret scanner, body-size limits.
 - **Observability:** audit log queue, request correlation ID, dashboard, health/discovery routes.
 - **Tooling:** CLI workflow runner and typed `@claude-hub/sdk` package structure.
-- **CI:** GitHub Actions build/test workflow.
+- **CI:** automated build/test commands are available locally; GitHub workflow files still require repository workflow permission to add.
 
 ## Key Commands
 
